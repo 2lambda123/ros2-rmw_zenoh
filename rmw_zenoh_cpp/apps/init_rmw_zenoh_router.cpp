@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include <stdlib.h>
+#include <unistd.h>
+#include <zenoh.h>
 
 #include <iostream>
 #include <string>
@@ -30,13 +32,22 @@ int Main(int, char **)
     ament_index_cpp::get_package_share_directory(RMW_ZENOH_IDENTIFIER) +
     "/config/" + std::string(ZENOH_ROUTER_CONFIG_NAME);
 
-  // Execute zenohd command
-  const std::string zenohd_cmd = "zenohd -c " + zenoh_router_config_path;
-  const int ret = system(zenohd_cmd.c_str());
-  if (ret != 0) {
-    std::cerr << "Failed to run zenoh router: " << zenohd_cmd << std::endl;
-    return ret;
+  z_owned_config_t config = zc_config_from_file(zenoh_router_config_path.c_str());
+  z_owned_session_t s = z_open(z_move(config));
+  if (!z_check(s)) {
+      printf("Unable to open router session!\n");
+      exit(-1);
   }
+
+  printf("Enter 'q' to quit...\n");
+  char c = 0;
+  while (c != 'q') {
+      c = getchar();
+      if (c == -1) {
+          sleep(1);
+      }
+  }
+  z_close(z_move(s));
   return 0;
 }
 
