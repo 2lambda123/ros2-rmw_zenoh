@@ -147,6 +147,9 @@ struct rmw_service_data_t
   z_owned_keyexpr_t keyexpr;
   z_owned_queryable_t qable;
 
+  // Liveliness token for the service.
+  zc_owned_liveliness_token_t token;
+
   const void * request_type_support_impl;
   const void * response_type_support_impl;
   const char * typesupport_identifier;
@@ -173,8 +176,10 @@ struct rmw_service_data_t
 struct rmw_client_data_t
 {
   z_owned_keyexpr_t keyexpr;
-
   z_owned_closure_reply_t zn_closure_reply;
+
+  // Liveliness token for the client.
+  zc_owned_liveliness_token_t token;
 
   std::mutex message_mutex;
   std::vector<z_owned_reply_t> replies;
