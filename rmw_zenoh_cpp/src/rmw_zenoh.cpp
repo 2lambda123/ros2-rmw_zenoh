@@ -2174,12 +2174,6 @@ rmw_create_service(
       return nullptr;
     }
   }
-  // rmw_qos_profile_t adapted_qos_profile =
-  //   rmw_dds_common::qos_profile_update_best_available_for_services(*qos_profile);
-  // if (!is_valid_qos(adapted_qos_profile)) {
-  //   RMW_SET_ERROR_MSG("create_service() called with invalid QoS");
-  //   return nullptr;
-  // }
 
   RMW_CHECK_FOR_NULL_WITH_MSG(
     node->context,
