@@ -82,6 +82,9 @@ z_owned_keyexpr_t ros_topic_name_to_zenoh_key(
   domain_ss << domain_id;
   char * stripped_topic_name = rcutils_strndup(
     &topic_name[start_offset], end_offset - start_offset, *allocator);
+  if (stripped_topic_name == nullptr) {
+    return z_keyexpr_null();
+  }
   z_owned_keyexpr_t keyexpr = z_keyexpr_join(
     z_keyexpr(domain_ss.str().c_str()), z_keyexpr(stripped_topic_name));
   allocator->deallocate(stripped_topic_name, allocator->state);
@@ -90,7 +93,7 @@ z_owned_keyexpr_t ros_topic_name_to_zenoh_key(
 }
 
 //==============================================================================
-const rosidl_message_type_support_t * find_type_support(
+const rosidl_message_type_support_t * find_message_type_support(
   const rosidl_message_type_support_t * type_supports)
 {
   const rosidl_message_type_support_t * type_support = get_message_typesupport_handle(
@@ -466,9 +469,9 @@ rmw_create_publisher(
   }
 
   // Get the RMW type support.
-  const rosidl_message_type_support_t * type_support = find_type_support(type_supports);
+  const rosidl_message_type_support_t * type_support = find_message_type_support(type_supports);
   if (type_support == nullptr) {
-    // error was already set by find_type_support
+    // error was already set by find_message_type_support
     return nullptr;
   }
 
@@ -1032,9 +1035,9 @@ rmw_serialize(
   const rosidl_message_type_support_t * type_support,
   rmw_serialized_message_t * serialized_message)
 {
-  const rosidl_message_type_support_t * ts = find_type_support(type_support);
+  const rosidl_message_type_support_t * ts = find_message_type_support(type_support);
   if (ts == nullptr) {
-    // error was already set by find_type_support
+    // error was already set by find_message_type_support
     return RMW_RET_ERROR;
   }
 
@@ -1067,9 +1070,9 @@ rmw_deserialize(
   const rosidl_message_type_support_t * type_support,
   void * ros_message)
 {
-  const rosidl_message_type_support_t * ts = find_type_support(type_support);
+  const rosidl_message_type_support_t * ts = find_message_type_support(type_support);
   if (ts == nullptr) {
-    // error was already set by find_type_support
+    // error was already set by find_message_type_support
     return RMW_RET_ERROR;
   }
 
@@ -1147,9 +1150,9 @@ rmw_create_subscription(
   //   return nullptr;
   // }
 
-  const rosidl_message_type_support_t * type_support = find_type_support(type_supports);
+  const rosidl_message_type_support_t * type_support = find_message_type_support(type_supports);
   if (type_support == nullptr) {
-    // error was already set by find_type_support
+    // error was already set by find_message_type_support
     return nullptr;
   }
 
@@ -1759,7 +1762,7 @@ rmw_create_client(
   // Obtain the type support
   const rosidl_service_type_support_t * type_support = find_service_type_support(type_supports);
   if (type_support == nullptr) {
-    // error was already set by find_type_support
+    // error was already set by find_service_type_support
     return nullptr;
   }
 
@@ -1997,9 +2000,12 @@ rmw_send_request(
       allocator->state));
   if (!request_bytes) {
     RMW_SET_ERROR_MSG("failed allocate request message bytes");
-    allocator->deallocate(request_bytes, allocator->state);
     return RMW_RET_ERROR;
   }
+  auto free_request_bytes = rcpputils::make_scope_exit(
+    [request_bytes, allocator]() {
+      allocator->deallocate(request_bytes, allocator->state);
+    });
 
   // Object that manages the raw buffer
   eprosima::fastcdr::FastBuffer fastbuffer(request_bytes, max_data_length);
@@ -2014,7 +2020,6 @@ rmw_send_request(
       ser,
       client_data->request_type_support_impl))
   {
-    allocator->deallocate(request_bytes, allocator->state);
     return RMW_RET_ERROR;
   }
 
@@ -2232,13 +2237,10 @@ rmw_create_service(
   // Get the RMW type support.
   const rosidl_service_type_support_t * type_support = find_service_type_support(type_supports);
   if (type_support == nullptr) {
-    // error was already set by find_type_support
+    // error was already set by find_service_type_support
     return nullptr;
   }
 
-  // TODO(francocipollone): Verify if this is the right way to get the
-  //                        type support as the architecture for the service here
-  //                        is different to the one used in DDS (with fastcdr).
   auto service_members = static_cast<const service_type_support_callbacks_t *>(type_support->data);
   auto request_members = static_cast<const message_type_support_callbacks_t *>(
     service_members->request_members_->data);
@@ -2562,9 +2564,12 @@ rmw_send_response(
       allocator->state));
   if (!response_bytes) {
     RMW_SET_ERROR_MSG("failed allocate response message bytes");
-    allocator->deallocate(response_bytes, allocator->state);
     return RMW_RET_ERROR;
   }
+  auto free_response_bytes = rcpputils::make_scope_exit(
+    [response_bytes, allocator]() {
+      allocator->deallocate(response_bytes, allocator->state);
+    });
 
   // Object that manages the raw buffer
   eprosima::fastcdr::FastBuffer fastbuffer(response_bytes, max_data_length);
@@ -2579,7 +2584,6 @@ rmw_send_response(
       ser,
       service_data->response_type_support_impl))
   {
-    allocator->deallocate(response_bytes, allocator->state);
     return RMW_RET_ERROR;
   }
 
