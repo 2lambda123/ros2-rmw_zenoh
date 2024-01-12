@@ -174,6 +174,7 @@ struct rmw_service_data_t
 struct rmw_client_data_t
 {
   z_owned_keyexpr_t keyexpr;
+
   z_owned_closure_reply_t zn_closure_reply;
 
   // Liveliness token for the client.
