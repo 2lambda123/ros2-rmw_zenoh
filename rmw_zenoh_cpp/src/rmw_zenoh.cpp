@@ -586,7 +586,9 @@ rmw_create_publisher(
   // Create a Publication Cache if durability is transient_local.
   publisher_data->pub_cache = ze_publication_cache_null();
   if (adapted_qos_profile.durability == RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL) {
+    printf("INITIALIZING QUERY CACHE!!!!\n");
     ze_publication_cache_options_t pub_cache_opts = ze_publication_cache_options_default();
+    pub_cache_opts.queryable_prefix = z_loan(keyexpr);
     pub_cache_opts.history = adapted_qos_profile.depth;
     publisher_data->pub_cache = ze_declare_publication_cache(
       z_loan(context_impl->session),
@@ -1330,6 +1332,7 @@ rmw_create_subscription(
   sub_data->reliable = false;
   if (adapted_qos_profile.durability == RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL) {
     ze_querying_subscriber_options_t sub_options = ze_querying_subscriber_options_default();
+    sub_options.query_consolidation = z_query_consolidation_latest();
     if (adapted_qos_profile.reliability == RMW_QOS_POLICY_RELIABILITY_RELIABLE) {
       sub_options.reliability = Z_RELIABILITY_RELIABLE;
       sub_data->reliable = true;
@@ -1345,6 +1348,19 @@ rmw_create_subscription(
       RMW_SET_ERROR_MSG("unable to create zenoh subscription");
       return nullptr;
     }
+    // Call get.
+    z_get_options_t opts = z_get_options_default();
+    opts.target = Z_QUERY_TARGET_ALL_COMPLETE;
+    // Latest consolidation guarantees unicity of replies for the same key expression. It optimizes bandwidth.
+    // Default is None which imples replies may come in any order and any number.
+    opts.consolidation = z_query_consolidation_latest();
+    ze_querying_subscriber_get(
+      z_loan(std::get<ze_owned_querying_subscriber_t>(sub_data->sub)),
+      z_loan(keyexpr),
+      &opts
+    );
+    printf("SET UP QUERYING SUB!!!\n");
+
   }
   // Create a regular subscriber for all other durability settings.
   else {
