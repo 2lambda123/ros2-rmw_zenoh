@@ -2126,7 +2126,10 @@ rmw_send_request(
   size_t data_length = ser.getSerializedDataLength();
 
   // TODO(clalancette): Locking for multiple requests at the same time
-  *sequence_id = client_data->sequence_number++;
+  {
+    std::lock_guard<std::mutex> lock(client_data->internal_mutex);
+    *sequence_id = client_data->sequence_number++;
+  }
 
   // Send request
   z_get_options_t opts = z_get_options_default();
@@ -3028,7 +3031,7 @@ rmw_wait(
     return RMW_RET_INCORRECT_RMW_IMPLEMENTATION);
 
   // TODO(yadunund): Switch to debug log level.
-  RCUTILS_LOG_WARN_NAMED(
+  RCUTILS_LOG_DEBUG_NAMED(
     "rmw_zenoh_cpp",
     "[rmw_wait] %ld subscriptions, %ld services, %ld clients, %ld events, %ld guard conditions",
     subscriptions->subscriber_count,
@@ -3039,7 +3042,7 @@ rmw_wait(
 
   // TODO(yadunund): Switch to debug log level.
   if (wait_timeout) {
-    RCUTILS_LOG_WARN_NAMED(
+    RCUTILS_LOG_DEBUG_NAMED(
       "rmw_zenoh_common_cpp", "[rmw_wait] TIMEOUT: %ld s %ld ns",
       wait_timeout->sec,
       wait_timeout->nsec);
