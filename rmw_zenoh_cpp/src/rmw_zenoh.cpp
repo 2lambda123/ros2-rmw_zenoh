@@ -2286,8 +2286,12 @@ rmw_take_response(
 
   *taken = true;
 
-  client_data->replies.pop_front();
-  z_reply_drop(latest_reply);
+  // client_data->replies.pop_front();
+  // z_reply_drop(latest_reply);
+  for (auto& reply : client_data->replies) {
+    z_reply_drop(&reply);
+  }
+  client_data->replies.clear();
 
   return RMW_RET_OK;
 }
