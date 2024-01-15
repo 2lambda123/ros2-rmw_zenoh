@@ -1348,6 +1348,9 @@ rmw_create_subscription(
       RMW_SET_ERROR_MSG("unable to create zenoh subscription");
       return nullptr;
     }
+    // Add to context map.
+    context_impl->querying_subs.insert(std::pair(rmw_subscription->topic_name, rmw_subscription));
+
     // Call get.
     z_get_options_t opts = z_get_options_default();
     opts.target = Z_QUERY_TARGET_ALL_COMPLETE;
@@ -1421,6 +1424,9 @@ rmw_create_subscription(
     return nullptr;
   }
 
+  sub_data->keyexpr = std::move(keyexpr);
+
+  always_free_ros_keyexpr.cancel();
   free_token.cancel();
   undeclare_z_sub.cancel();
   free_topic_name.cancel();

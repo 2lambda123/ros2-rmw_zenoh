@@ -246,6 +246,32 @@ rmw_init(const rmw_init_options_t * options, rmw_context_t * context)
       RMW_TRY_DESTRUCTOR_FROM_WITHIN_FAILURE(gc_data->~GuardCondition(), GuardCondition);
     });
 
+  auto query_cb =
+    [context_impl = context->impl](const std::string& pub_keyexpr) -> void
+    {
+      printf("query cb called for %s!!\n", pub_keyexpr.c_str());
+      auto it = context_impl->querying_subs.find(pub_keyexpr);
+      if (it == context_impl->querying_subs.end())
+      {
+        return;
+      }
+      printf("query cb found sub!!!\n");
+      auto sub = it->second;
+      rmw_subscription_data_t * sub_data = static_cast<rmw_subscription_data_t *>(sub->data);
+      z_get_options_t opts = z_get_options_default();
+      opts.target = Z_QUERY_TARGET_ALL_COMPLETE;
+      // Latest consolidation guarantees unicity of replies for the same key expression. It optimizes bandwidth.
+      // Default is None which imples replies may come in any order and any number.
+      opts.consolidation = z_query_consolidation_latest();
+      ze_querying_subscriber_get(
+        z_loan(std::get<ze_owned_querying_subscriber_t>(sub_data->sub)),
+        z_loan(sub_data->keyexpr),
+        &opts
+      );
+      printf("Exit query cb!!\n");
+    };
+  context->impl->graph_cache.set_query_cb(std::move(query_cb));
+
   // Setup liveliness subscriptions for discovery.
   const std::string liveliness_str = liveliness::subscription_token(context->actual_domain_id);
 

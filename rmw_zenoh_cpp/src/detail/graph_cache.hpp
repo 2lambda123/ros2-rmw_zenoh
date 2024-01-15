@@ -15,6 +15,7 @@
 #ifndef DETAIL__GRAPH_CACHE_HPP_
 #define DETAIL__GRAPH_CACHE_HPP_
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -90,6 +91,16 @@ using GraphNodePtr = std::shared_ptr<GraphNode>;
 class GraphCache final
 {
 public:
+
+  using QueryCB = std::function<void(const std::string&)>;
+
+  void set_query_cb(QueryCB querying_sub_cb_)
+  {
+    querying_sub_cb = std::move(querying_sub_cb_);
+  }
+
+  QueryCB querying_sub_cb = nullptr;
+
   // Parse a PUT message over a token's key-expression and update the graph.
   void parse_put(const std::string & keyexpr);
   // Parse a DELETE message over a token's key-expression and update the graph.

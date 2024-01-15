@@ -56,6 +56,7 @@ struct rmw_context_impl_s
   /// Guard condition that should be triggered when the graph changes.
   rmw_guard_condition_t * graph_guard_condition;
 
+  std::unordered_map<std::string, rmw_subscription_t *> querying_subs = {};
   GraphCache graph_cache;
 };
 
@@ -114,6 +115,8 @@ struct saved_msg_data
 ///==============================================================================
 struct rmw_subscription_data_t
 {
+  z_owned_keyexpr_t keyexpr;
+
   // An owned subscriber or querying_subscriber depending on the QoS settings.
   std::variant<z_owned_subscriber_t, ze_owned_querying_subscriber_t> sub;
 

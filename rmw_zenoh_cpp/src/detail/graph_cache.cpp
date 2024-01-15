@@ -111,6 +111,12 @@ void GraphCache::parse_put(const std::string & keyexpr)
             return graph_node.clients_;
           }
         }();
+
+      if (entity.type() == EntityType::Publisher)
+      {
+        querying_sub_cb(topic_info.name_);
+      }
+
       // For the sake of reusing data structures and lookup functions, we treat publishers and clients are equivalent.
       // Similarly, subscriptions and services are equivalent.
       const std::size_t pub_count = entity.type() == EntityType::Publisher ||
