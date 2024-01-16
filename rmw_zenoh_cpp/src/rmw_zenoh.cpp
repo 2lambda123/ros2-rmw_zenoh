@@ -3173,7 +3173,7 @@ rmw_wait(
       auto serv_data = static_cast<rmw_service_data_t *>(services->services[i]);
       if (serv_data != nullptr) {
         serv_data->condition = nullptr;
-        if (serv_data->query_queue.empty()) {
+        if (serv_data->query_queue.empty() && serv_data->sequence_to_query_map.empty()) {
           // Setting to nullptr lets rcl know that this service is not ready
           services->services[i] = nullptr;
         }
