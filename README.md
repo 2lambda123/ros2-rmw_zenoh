@@ -40,13 +40,13 @@ cd ~/ws_rmw_zenoh
 source install/setup.bash
 ```
 
-In a terminal launch Zenoh router:
+2. In a terminal, launch the Zenoh router by running the command:
 ```bash
 ros2 run rmw_zenoh_cpp init_rmw_zenoh_router
 ```
 > Note: Manually launching zenoh router won't be necessary in the future.
 
-In a different terminal source install folder and execute:
+3. In a different terminal, set the RMW implementation to `rmw_zenoh_cpp` by running the following command:
 
 ```bash
 export RMW_IMPLEMENTATION=rmw_zenoh_cpp
