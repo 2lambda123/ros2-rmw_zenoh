@@ -37,58 +37,58 @@
 ///==============================================================================
 struct rmw_context_impl_s
 {
-  // An owned session.
-  z_owned_session_t session;
+    // An owned session.
+    z_owned_session_t session;
 
-  // The SHM manager.
-  zc_owned_shm_manager_t shm_manager;
+    // The SHM manager.
+    zc_owned_shm_manager_t shm_manager;
 
-  z_owned_subscriber_t graph_subscriber;
+    z_owned_subscriber_t graph_subscriber;
 
-  /// Shutdown flag.
-  bool is_shutdown;
+    /// Shutdown flag.
+    bool is_shutdown;
 
-  // Equivalent to rmw_dds_common::Context's guard condition
-  /// Guard condition that should be triggered when the graph changes.
-  rmw_guard_condition_t * graph_guard_condition;
+    // Equivalent to rmw_dds_common::Context's guard condition
+    /// Guard condition that should be triggered when the graph changes.
+    rmw_guard_condition_t * graph_guard_condition;
 
-  GraphCache graph_cache;
+    GraphCache graph_cache;
 };
 
 ///==============================================================================
 struct rmw_node_data_t
 {
-  // TODO(yadunund): Add a GraphCache object.
+    // TODO(yadunund): Add a GraphCache object.
 
-  // Map topic name to topic types.
-  std::unordered_set<std::unordered_set<std::string>> publishers;
-  std::unordered_set<std::unordered_set<std::string>> subscriptions;
+    // Map topic name to topic types.
+    std::unordered_set<std::unordered_set<std::string>> publishers;
+    std::unordered_set<std::unordered_set<std::string>> subscriptions;
 };
 
 ///==============================================================================
 struct rmw_publisher_data_t
 {
-  // An owned publisher.
-  z_owned_publisher_t pub;
+    // An owned publisher.
+    z_owned_publisher_t pub;
 
-  // Type support fields
-  const void * type_support_impl;
-  const char * typesupport_identifier;
-  MessageTypeSupport * type_support;
+    // Type support fields
+    const void * type_support_impl;
+    const char * typesupport_identifier;
+    MessageTypeSupport * type_support;
 
-  // Context for memory allocation for messages.
-  rmw_context_t * context;
+    // Context for memory allocation for messages.
+    rmw_context_t * context;
 
-  uint64_t graph_cache_handle;
+    uint64_t graph_cache_handle;
 };
 
 ///==============================================================================
 struct rmw_wait_set_data_t
 {
-  std::condition_variable condition_variable;
-  std::mutex condition_mutex;
+    std::condition_variable condition_variable;
+    std::mutex condition_mutex;
 
-  rmw_context_t * context;
+    rmw_context_t * context;
 };
 
 ///==============================================================================
@@ -97,37 +97,37 @@ void sub_data_handler(const z_sample_t * sample, void * sub_data);
 
 struct saved_msg_data
 {
-  explicit saved_msg_data(zc_owned_payload_t p, uint64_t recv_ts, const uint8_t pub_gid[16])
-  : payload(p), recv_timestamp(recv_ts)
-  {
-    memcpy(publisher_gid, pub_gid, 16);
-  }
+    explicit saved_msg_data(zc_owned_payload_t p, uint64_t recv_ts, const uint8_t pub_gid[16])
+        : payload(p), recv_timestamp(recv_ts)
+    {
+        memcpy(publisher_gid, pub_gid, 16);
+    }
 
-  zc_owned_payload_t payload;
-  uint64_t recv_timestamp;
-  uint8_t publisher_gid[16];
+    zc_owned_payload_t payload;
+    uint64_t recv_timestamp;
+    uint8_t publisher_gid[16];
 };
 
 ///==============================================================================
 struct rmw_subscription_data_t
 {
-  z_owned_subscriber_t sub;
+    z_owned_subscriber_t sub;
 
-  const void * type_support_impl;
-  const char * typesupport_identifier;
-  MessageTypeSupport * type_support;
-  rmw_context_t * context;
+    const void * type_support_impl;
+    const char * typesupport_identifier;
+    MessageTypeSupport * type_support;
+    rmw_context_t * context;
 
-  std::deque<std::unique_ptr<saved_msg_data>> message_queue;
-  std::mutex message_queue_mutex;
+    std::deque<std::unique_ptr<saved_msg_data>> message_queue;
+    std::mutex message_queue_mutex;
 
-  size_t queue_depth;
-  bool reliable;
+    size_t queue_depth;
+    bool reliable;
 
-  std::mutex internal_mutex;
-  std::condition_variable * condition{nullptr};
+    std::mutex internal_mutex;
+    std::condition_variable * condition{nullptr};
 
-  uint64_t graph_cache_handle;
+    uint64_t graph_cache_handle;
 };
 
 #endif  // DETAIL__RMW_DATA_TYPES_HPP_

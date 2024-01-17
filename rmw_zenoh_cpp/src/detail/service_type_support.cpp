@@ -29,24 +29,24 @@ ServiceTypeSupport::ServiceTypeSupport()
 
 RequestTypeSupport::RequestTypeSupport(const service_type_support_callbacks_t * members)
 {
-  assert(members);
+    assert(members);
 
-  auto msg = static_cast<const message_type_support_callbacks_t *>(
-    members->request_members_->data);
-  std::string name = _create_type_name(msg);  // + "Request_";
-  this->set_name(name.c_str());
+    auto msg = static_cast<const message_type_support_callbacks_t *>(
+                   members->request_members_->data);
+    std::string name = _create_type_name(msg);  // + "Request_";
+    this->set_name(name.c_str());
 
-  set_members(msg);
+    set_members(msg);
 }
 
 ResponseTypeSupport::ResponseTypeSupport(const service_type_support_callbacks_t * members)
 {
-  assert(members);
+    assert(members);
 
-  auto msg = static_cast<const message_type_support_callbacks_t *>(
-    members->response_members_->data);
-  std::string name = _create_type_name(msg);  // + "Response_";
-  this->set_name(name.c_str());
+    auto msg = static_cast<const message_type_support_callbacks_t *>(
+                   members->response_members_->data);
+    std::string name = _create_type_name(msg);  // + "Response_";
+    this->set_name(name.c_str());
 
-  set_members(msg);
+    set_members(msg);
 }

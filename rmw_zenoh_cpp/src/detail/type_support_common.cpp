@@ -27,20 +27,20 @@
 
 std::string
 _create_type_name(
-  const message_type_support_callbacks_t * members)
+    const message_type_support_callbacks_t * members)
 {
-  if (!members) {
-    RMW_SET_ERROR_MSG("members handle is null");
-    return "";
-  }
-  std::string message_namespace(members->message_namespace_);
-  std::string message_name(members->message_name_);
+    if (!members) {
+        RMW_SET_ERROR_MSG("members handle is null");
+        return "";
+    }
+    std::string message_namespace(members->message_namespace_);
+    std::string message_name(members->message_name_);
 
-  std::ostringstream ss;
-  if (!message_namespace.empty()) {
-    ss << message_namespace << "::";
-  }
-  ss << "dds_::" << message_name << "_";
+    std::ostringstream ss;
+    if (!message_namespace.empty()) {
+        ss << message_namespace << "::";
+    }
+    ss << "dds_::" << message_name << "_";
 
-  return ss.str();
+    return ss.str();
 }

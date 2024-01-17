@@ -28,51 +28,51 @@
 
 enum SerializedDataType
 {
-  FASTRTPS_SERIALIZED_DATA_TYPE_CDR_BUFFER,
-  FASTRTPS_SERIALIZED_DATA_TYPE_DYNAMIC_MESSAGE,
-  FASTRTPS_SERIALIZED_DATA_TYPE_ROS_MESSAGE
+    FASTRTPS_SERIALIZED_DATA_TYPE_CDR_BUFFER,
+    FASTRTPS_SERIALIZED_DATA_TYPE_DYNAMIC_MESSAGE,
+    FASTRTPS_SERIALIZED_DATA_TYPE_ROS_MESSAGE
 };
 
 // Publishers write method will receive a pointer to this struct
 struct SerializedData
 {
-  SerializedDataType type;  // The type of the next field
-  void * data;
-  const void * impl;  // RMW implementation specific data
+    SerializedDataType type;  // The type of the next field
+    void * data;
+    const void * impl;  // RMW implementation specific data
 };
 
 class TypeSupport
 {
 public:
-  void set_name(const char * name);
+    void set_name(const char * name);
 
-  const char * get_name() const;
+    const char * get_name() const;
 
-  size_t get_estimated_serialized_size(const void * ros_message, const void * impl) const;
+    size_t get_estimated_serialized_size(const void * ros_message, const void * impl) const;
 
-  bool serialize_ros_message(
-    const void * ros_message, eprosima::fastcdr::Cdr & ser, const void * impl) const;
+    bool serialize_ros_message(
+        const void * ros_message, eprosima::fastcdr::Cdr & ser, const void * impl) const;
 
-  bool deserialize_ros_message(
-    eprosima::fastcdr::Cdr & deser, void * ros_message, const void * impl) const;
+    bool deserialize_ros_message(
+        eprosima::fastcdr::Cdr & deser, void * ros_message, const void * impl) const;
 
-  virtual ~TypeSupport() {}
+    virtual ~TypeSupport() {}
 
 protected:
-  TypeSupport();
+    TypeSupport();
 
-  bool max_size_bound_;
-  bool is_plain_;
+    bool max_size_bound_;
+    bool is_plain_;
 
-  void set_members(const message_type_support_callbacks_t * members);
+    void set_members(const message_type_support_callbacks_t * members);
 
 private:
-  const message_type_support_callbacks_t * members_;
-  bool has_data_;
+    const message_type_support_callbacks_t * members_;
+    bool has_data_;
 
-  uint32_t type_size_;
+    uint32_t type_size_;
 
-  std::string topic_data_type_name_;
+    std::string topic_data_type_name_;
 };
 
 #endif  // DETAIL__TYPE_SUPPORT_HPP_

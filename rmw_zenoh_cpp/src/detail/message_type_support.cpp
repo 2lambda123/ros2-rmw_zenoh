@@ -26,10 +26,10 @@
 
 MessageTypeSupport::MessageTypeSupport(const message_type_support_callbacks_t * members)
 {
-  assert(members);
+    assert(members);
 
-  std::string name = _create_type_name(members);
-  this->set_name(name.c_str());
+    std::string name = _create_type_name(members);
+    this->set_name(name.c_str());
 
-  set_members(members);
+    set_members(members);
 }

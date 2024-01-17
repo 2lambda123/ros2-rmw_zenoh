@@ -18,36 +18,36 @@
 
 extern "C"
 {
-rmw_ret_t
-rmw_qos_profile_check_compatible(
-  const rmw_qos_profile_t publisher_profile,
-  const rmw_qos_profile_t subscription_profile,
-  rmw_qos_compatibility_type_t * compatibility,
-  char * reason,
-  size_t reason_size)
-{
-  if (!compatibility) {
-    RMW_SET_ERROR_MSG("compatibility parameter is null");
-    return RMW_RET_INVALID_ARGUMENT;
-  }
+    rmw_ret_t
+    rmw_qos_profile_check_compatible(
+        const rmw_qos_profile_t publisher_profile,
+        const rmw_qos_profile_t subscription_profile,
+        rmw_qos_compatibility_type_t * compatibility,
+        char * reason,
+        size_t reason_size)
+    {
+        if (!compatibility) {
+            RMW_SET_ERROR_MSG("compatibility parameter is null");
+            return RMW_RET_INVALID_ARGUMENT;
+        }
 
-  if (!reason && reason_size != 0u) {
-    RMW_SET_ERROR_MSG("reason parameter is null, but reason_size parameter is not zero");
-    return RMW_RET_INVALID_ARGUMENT;
-  }
+        if (!reason && reason_size != 0u) {
+            RMW_SET_ERROR_MSG("reason parameter is null, but reason_size parameter is not zero");
+            return RMW_RET_INVALID_ARGUMENT;
+        }
 
-  // Presume profiles are compatible until proven otherwise
-  *compatibility = RMW_QOS_COMPATIBILITY_OK;
+        // Presume profiles are compatible until proven otherwise
+        *compatibility = RMW_QOS_COMPATIBILITY_OK;
 
-  // Initialize reason buffer
-  if (reason && reason_size != 0u) {
-    reason[0] = '\0';
-  }
+        // Initialize reason buffer
+        if (reason && reason_size != 0u) {
+            reason[0] = '\0';
+        }
 
-  // TODO(clalancette): check compatibility in Zenoh QOS profiles.
-  (void)publisher_profile;
-  (void)subscription_profile;
+        // TODO(clalancette): check compatibility in Zenoh QOS profiles.
+        (void)publisher_profile;
+        (void)subscription_profile;
 
-  return RMW_RET_OK;
-}
+        return RMW_RET_OK;
+    }
 }  // extern "C"

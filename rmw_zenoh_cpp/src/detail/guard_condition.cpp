@@ -17,50 +17,50 @@
 
 ///==============================================================================
 GuardCondition::GuardCondition()
-: has_triggered_(false),
-  condition_variable_(nullptr)
+    : has_triggered_(false),
+      condition_variable_(nullptr)
 {
 }
 
 ///==============================================================================
 void GuardCondition::trigger()
 {
-  std::lock_guard<std::mutex> lock(internal_mutex_);
+    std::lock_guard<std::mutex> lock(internal_mutex_);
 
-  // the change to hasTriggered_ needs to be mutually exclusive with
-  // rmw_wait() which checks hasTriggered() and decides if wait() needs to
-  // be called
-  has_triggered_ = true;
+    // the change to hasTriggered_ needs to be mutually exclusive with
+    // rmw_wait() which checks hasTriggered() and decides if wait() needs to
+    // be called
+    has_triggered_ = true;
 
-  if (condition_variable_ != nullptr) {
-    condition_variable_->notify_one();
-  }
+    if (condition_variable_ != nullptr) {
+        condition_variable_->notify_one();
+    }
 }
 
 ///==============================================================================
 void GuardCondition::attach_condition(std::condition_variable * condition_variable)
 {
-  std::lock_guard<std::mutex> lock(internal_mutex_);
-  condition_variable_ = condition_variable;
+    std::lock_guard<std::mutex> lock(internal_mutex_);
+    condition_variable_ = condition_variable;
 }
 
 ///==============================================================================
 void GuardCondition::detach_condition()
 {
-  std::lock_guard<std::mutex> lock(internal_mutex_);
-  condition_variable_ = nullptr;
+    std::lock_guard<std::mutex> lock(internal_mutex_);
+    condition_variable_ = nullptr;
 }
 
 ///==============================================================================
 bool GuardCondition::has_triggered() const
 {
-  std::lock_guard<std::mutex> lock(internal_mutex_);
-  return has_triggered_;
+    std::lock_guard<std::mutex> lock(internal_mutex_);
+    return has_triggered_;
 }
 
 ///==============================================================================
 void GuardCondition::reset_trigger()
 {
-  std::lock_guard<std::mutex> lock(internal_mutex_);
-  has_triggered_ = false;
+    std::lock_guard<std::mutex> lock(internal_mutex_);
+    has_triggered_ = false;
 }

@@ -26,7 +26,7 @@
 class MessageTypeSupport final : public TypeSupport
 {
 public:
-  explicit MessageTypeSupport(const message_type_support_callbacks_t * members);
+    explicit MessageTypeSupport(const message_type_support_callbacks_t * members);
 };
 
 #endif  // DETAIL__MESSAGE_TYPE_SUPPORT_HPP_

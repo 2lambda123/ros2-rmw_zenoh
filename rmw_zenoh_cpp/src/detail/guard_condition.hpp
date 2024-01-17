@@ -24,24 +24,24 @@
 class GuardCondition final
 {
 public:
-  GuardCondition();
+    GuardCondition();
 
-  // Sets has_triggered_ to true and calls notify_one() on condition_variable_ if set.
-  void trigger();
+    // Sets has_triggered_ to true and calls notify_one() on condition_variable_ if set.
+    void trigger();
 
-  void attach_condition(std::condition_variable * condition_variable);
+    void attach_condition(std::condition_variable * condition_variable);
 
-  void detach_condition();
+    void detach_condition();
 
-  bool has_triggered() const;
+    bool has_triggered() const;
 
-  // Resets has_triggered_ to false.
-  void reset_trigger();
+    // Resets has_triggered_ to false.
+    void reset_trigger();
 
 private:
-  mutable std::mutex internal_mutex_;
-  std::atomic_bool has_triggered_;
-  std::condition_variable * condition_variable_;
+    mutable std::mutex internal_mutex_;
+    std::atomic_bool has_triggered_;
+    std::condition_variable * condition_variable_;
 };
 
 #endif  // DETAIL__GUARD_CONDITION_HPP_
