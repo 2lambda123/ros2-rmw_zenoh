@@ -15,111 +15,67 @@
 #ifndef DETAIL__GRAPH_CACHE_HPP_
 #define DETAIL__GRAPH_CACHE_HPP_
 
-#include <zenoh.h>
-
 #include <map>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
+
+#include "liveliness_utils.hpp"
 
 #include "rcutils/allocator.h"
 #include "rcutils/types.h"
 
 #include "rmw/rmw.h"
+#include "rmw/names_and_types.h"
 
-#include "yaml-cpp/yaml.h"
 
 ///=============================================================================
-class GenerateToken
+struct TopicStats
 {
-public:
-  static std::string liveliness(size_t domain_id);
+  std::size_t pub_count_;
+  std::size_t sub_count_;
 
-  /// Returns a string with key-expression @ros2_lv/domain_id/N/namespace/name
-  static std::string node(
-    size_t domain_id,
-    const std::string & namespace_,
-    const std::string & name);
-
-  static std::string publisher(
-    size_t domain_id,
-    const std::string & node_namespace,
-    const std::string & node_name,
-    const std::string & topic,
-    const std::string & type,
-    const std::string & qos);
+  // Constructor which initializes counters to 0.
+  TopicStats(std::size_t pub_count, std::size_t sub_count);
 };
 
 ///=============================================================================
-/// Helper utilities to put/delete tokens until liveliness is supported in the
-/// zenoh-c bindings.
-class PublishToken
+struct TopicData
 {
-public:
-  static bool put(
-    z_owned_session_t * session,
-    const std::string & token);
+  liveliness::TopicInfo info_;
+  TopicStats stats_;
 
-  static bool del(
-    z_owned_session_t * session,
-    const std::string & token);
+  TopicData(
+    liveliness::TopicInfo info,
+    TopicStats stats);
 };
+using TopicDataPtr = std::shared_ptr<TopicData>;
 
 ///=============================================================================
-class PublisherData final
+// TODO(Yadunund): Expand to services and clients.
+struct GraphNode
 {
-public:
-  PublisherData(
-    const char * topic, const char * node, const char * namespace_,
-    const char * type, rcutils_allocator_t * allocator);
+  std::string ns_;
+  std::string name_;
+  // TODO(Yadunund): Should enclave be the parent to the namespace key and not within a Node?
+  std::string enclave_;
 
-  ~PublisherData();
-
-private:
-  rcutils_allocator_t * allocator_;
-  char * topic_name_{nullptr};
-  char * node_name_{nullptr};
-  char * namespace_name_{nullptr};
-  char * type_name_{nullptr};
+  // Map topic type to TopicData
+  using TopicDataMap = std::unordered_map<std::string, TopicDataPtr>;
+  // Map topic name to TopicDataMap
+  using TopicMap = std::unordered_map<std::string, TopicDataMap>;
+  TopicMap pubs_ = {};
+  TopicMap subs_ = {};
 };
-
-///=============================================================================
-class SubscriptionData final
-{
-public:
-  SubscriptionData(
-    const char * topic, const char * node, const char * namespace_,
-    const char * type, rcutils_allocator_t * allocator);
-
-  ~SubscriptionData();
-
-private:
-  rcutils_allocator_t * allocator_;
-  char * topic_name_{nullptr};
-  char * node_name_{nullptr};
-  char * namespace_name_{nullptr};
-  char * type_name_{nullptr};
-};
+using GraphNodePtr = std::shared_ptr<GraphNode>;
 
 ///=============================================================================
 class GraphCache final
 {
 public:
-  uint64_t
-  add_publisher(
-    const char * topic, const char * node, const char * namespace_,
-    const char * type, rcutils_allocator_t * allocator);
-
-  void remove_publisher(uint64_t publisher_handle);
-
-  uint64_t
-  add_subscription(
-    const char * topic, const char * node, const char * namespace_,
-    const char * type, rcutils_allocator_t * allocator);
-
-  void remove_subscription(uint64_t subscription_handle);
-
   // Parse a PUT message over a token's key-expression and update the graph.
   void parse_put(const std::string & keyexpr);
   // Parse a DELETE message over a token's key-expression and update the graph.
@@ -131,36 +87,58 @@ public:
     rcutils_string_array_t * enclaves,
     rcutils_allocator_t * allocator) const;
 
+  rmw_ret_t get_topic_names_and_types(
+    rcutils_allocator_t * allocator,
+    bool no_demangle,
+    rmw_names_and_types_t * topic_names_and_types) const;
+
+  rmw_ret_t count_publishers(
+    const char * topic_name,
+    size_t * count) const;
+
+  rmw_ret_t count_subscriptions(
+    const char * topic_name,
+    size_t * count) const;
+
+  rmw_ret_t get_entity_names_and_types_by_node(
+    liveliness::EntityType entity_type,
+    rcutils_allocator_t * allocator,
+    const char * node_name,
+    const char * node_namespace,
+    bool no_demangle,
+    rmw_names_and_types_t * names_and_types) const;
+
 private:
-  std::mutex publishers_mutex_;
-  uint64_t publishers_handle_id_{0};
-  std::map<uint64_t, std::unique_ptr<PublisherData>> publishers_;
-
-  std::mutex subscriptions_mutex_;
-  uint64_t subscriptions_handle_id_{0};
-  std::map<uint64_t, std::unique_ptr<SubscriptionData>> subscriptions_;
-
   /*
-  node_1:
-    enclave:
-    namespace:
-    publishers: [
-        {
-          topic:
-          type:
-          qos:
-        }
-    ]
-    subscriptions: [
-        {
-          topic:
-          type:
-          qos:
-        }
-    ]
-  node_n:
+  namespace_1:
+    node_1:
+      enclave:
+      publishers: [
+          {
+            topic:
+            type:
+            qos:
+          }
+      ],
+      subscriptions: [
+          {
+            topic:
+            type:
+            qos:
+          }
+      ],
+  namespace_2:
+    node_n:
   */
-  YAML::Node graph_;
+
+  using NodeMap = std::unordered_map<std::string, GraphNodePtr>;
+  using NamespaceMap = std::unordered_map<std::string, NodeMap>;
+  // Map namespace to a map of <node_name, GraphNodePtr>.
+  NamespaceMap graph_ = {};
+
+  // Optimize topic lookups across the graph.
+  GraphNode::TopicMap graph_topics_ = {};
+
   mutable std::mutex graph_mutex_;
 };
 

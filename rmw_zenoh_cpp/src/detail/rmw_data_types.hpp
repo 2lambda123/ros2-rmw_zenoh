@@ -22,6 +22,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -31,6 +32,7 @@
 
 #include "graph_cache.hpp"
 #include "message_type_support.hpp"
+#include "service_type_support.hpp"
 
 /// Structs for various type erased data fields.
 
@@ -58,11 +60,10 @@ struct rmw_context_impl_s
 ///==============================================================================
 struct rmw_node_data_t
 {
-  // TODO(yadunund): Add a GraphCache object.
-
-  // Map topic name to topic types.
-  std::unordered_set<std::unordered_set<std::string>> publishers;
-  std::unordered_set<std::unordered_set<std::string>> subscriptions;
+  // TODO(Yadunund): Do we need a token at the node level? Right now I have one
+  // for cases where a node may spin up but does not have any publishers or subscriptions.
+  // Liveliness token for the node.
+  zc_owned_liveliness_token_t token;
 };
 
 ///==============================================================================
@@ -71,6 +72,9 @@ struct rmw_publisher_data_t
   // An owned publisher.
   z_owned_publisher_t pub;
 
+  // Liveliness token for the publisher.
+  zc_owned_liveliness_token_t token;
+
   // Type support fields
   const void * type_support_impl;
   const char * typesupport_identifier;
@@ -78,8 +82,6 @@ struct rmw_publisher_data_t
 
   // Context for memory allocation for messages.
   rmw_context_t * context;
-
-  uint64_t graph_cache_handle;
 };
 
 ///==============================================================================
@@ -97,11 +99,7 @@ void sub_data_handler(const z_sample_t * sample, void * sub_data);
 
 struct saved_msg_data
 {
-  explicit saved_msg_data(zc_owned_payload_t p, uint64_t recv_ts, const uint8_t pub_gid[16])
-  : payload(p), recv_timestamp(recv_ts)
-  {
-    memcpy(publisher_gid, pub_gid, 16);
-  }
+  explicit saved_msg_data(zc_owned_payload_t p, uint64_t recv_ts, const uint8_t pub_gid[16]);
 
   zc_owned_payload_t payload;
   uint64_t recv_timestamp;
@@ -112,6 +110,9 @@ struct saved_msg_data
 struct rmw_subscription_data_t
 {
   z_owned_subscriber_t sub;
+
+  // Liveliness token for the subscription.
+  zc_owned_liveliness_token_t token;
 
   const void * type_support_impl;
   const char * typesupport_identifier;
@@ -126,8 +127,71 @@ struct rmw_subscription_data_t
 
   std::mutex internal_mutex;
   std::condition_variable * condition{nullptr};
+};
 
-  uint64_t graph_cache_handle;
+
+///==============================================================================
+
+// z_owned_closure_query_t
+void service_data_handler(const z_query_t * query, void * service_data);
+
+// void client_data_handler(z_owned_reply_t * reply, void * client_data);
+
+
+///==============================================================================
+
+struct rmw_service_data_t
+{
+  unsigned int get_new_uid();
+
+  const char * keyexpr;
+  z_owned_queryable_t qable;
+
+  const void * request_type_support_impl;
+  const void * response_type_support_impl;
+  const char * typesupport_identifier;
+  RequestTypeSupport * request_type_support;
+  ResponseTypeSupport * response_type_support;
+
+  rmw_context_t * context;
+
+  // Map to store the query id and the query.
+  // The query handler is saved as it is needed to answer the query later on.
+  std::unordered_map<unsigned int, std::unique_ptr<z_owned_query_t>> id_query_map;
+  // The query id's of the queries that need to be processed.
+  std::deque<unsigned int> to_take;
+  std::mutex query_queue_mutex;
+
+  std::mutex internal_mutex;
+  std::condition_variable * condition{nullptr};
+
+  unsigned int client_count{};
+};
+
+///==============================================================================
+
+struct rmw_client_data_t
+{
+  // const char * service_name;
+  z_owned_keyexpr_t keyexpr;
+
+  // z_owned_closure_reply_t zn_closure_reply;
+  z_owned_reply_channel_t channel;
+
+  std::mutex message_mutex;
+  std::vector<z_owned_reply_t> replies;
+  // std::unique_ptr<saved_msg_data> message;
+
+  const void * request_type_support_impl;
+  const void * response_type_support_impl;
+  const char * typesupport_identifier;
+  RequestTypeSupport * request_type_support;
+  ResponseTypeSupport * response_type_support;
+
+  rmw_context_t * context;
+
+  std::mutex internal_mutex;
+  std::condition_variable * condition{nullptr};
 };
 
 #endif  // DETAIL__RMW_DATA_TYPES_HPP_
