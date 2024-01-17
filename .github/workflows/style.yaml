@@ -8,7 +8,7 @@ defaults:
     shell: bash
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         docker_image: ['ros:iron-ros-base', 'ros:rolling-ros-base']
@@ -18,4 +18,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: style
-      run: /ros_entrypoint.sh ament_uncrustify rmw_zenoh_cpp/
+      run: /ros_entrypoint.sh uncrustify rmw_zenoh_cpp/

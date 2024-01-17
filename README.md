@@ -15,8 +15,11 @@ For information about the Design please visit [design](docs/design.md) page.
 
 ## Setup
 
-Install latest rustc.
-> Note: The version of rustc that can be installed via apt is outdated.
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+> Note: The version of # Install latest version of Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
@@ -26,7 +29,7 @@ Build `rmw_zenoh_cpp`
 ```bash
 mkdir ~/ws_rmw_zenoh/src -p && cd ~/ws_rmw_zenoh/src
 git clone https://github.com/ros2/rmw_zenoh.git
-cd ~/ws_rmw_zenoh
+cd ~/ws_rmw_zenoh/install
 source /opt/ros/<DISTRO>/setup.bash # replace <DISTRO> with ROS 2 distro of choice
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 

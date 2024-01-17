@@ -46,7 +46,7 @@ Default Configuration for Zenoh Sessions:
 | Config | Zenoh Session    | Zenoh Router    |
 | :---:   | :---: | :---: |
 | Mode | Peer   | Router   |
-| Connect | tcp/localhost:7447   |  -  |
+| Connect | tcp/localhost:7447   |  tcp/zenoh_router:7447  |
 | UDP Multicast | Disabled | Disabled   |
 | Gossip Scouting | Enabled | Enabled   |
 
