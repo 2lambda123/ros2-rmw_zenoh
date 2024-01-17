@@ -26,20 +26,20 @@ extern "C"
 ///==============================================================================
 /// Return all topic names and types in the ROS graph.
 // TODO(yadunund): Fix implementation once discovery information can be cached.
-rmw_ret_t
-rmw_get_topic_names_and_types(
-  const rmw_node_t * node,
-  rcutils_allocator_t * allocator,
-  bool no_demangle,
-  rmw_names_and_types_t * topic_names_and_types)
-{
-  RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(node->context, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(node->context->impl, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(allocator, RMW_RET_INVALID_ARGUMENT);
-  RMW_CHECK_ARGUMENT_FOR_NULL(topic_names_and_types, RMW_RET_INVALID_ARGUMENT);
+    rmw_ret_t
+    rmw_get_topic_names_and_types(
+        const rmw_node_t * node,
+        rcutils_allocator_t * allocator,
+        bool no_demangle,
+        rmw_names_and_types_t * topic_names_and_types)
+    {
+        RMW_CHECK_ARGUMENT_FOR_NULL(node, RMW_RET_INVALID_ARGUMENT);
+        RMW_CHECK_ARGUMENT_FOR_NULL(node->context, RMW_RET_INVALID_ARGUMENT);
+        RMW_CHECK_ARGUMENT_FOR_NULL(node->context->impl, RMW_RET_INVALID_ARGUMENT);
+        RMW_CHECK_ARGUMENT_FOR_NULL(allocator, RMW_RET_INVALID_ARGUMENT);
+        RMW_CHECK_ARGUMENT_FOR_NULL(topic_names_and_types, RMW_RET_INVALID_ARGUMENT);
 
-  return node->context->impl->graph_cache.get_topic_names_and_types(
-    allocator, no_demangle, topic_names_and_types);
-}
+        return node->context->impl->graph_cache.get_topic_names_and_types(
+                   allocator, no_demangle, topic_names_and_types);
+    }
 }  // extern "C"

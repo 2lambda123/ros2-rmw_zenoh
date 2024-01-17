@@ -28,29 +28,29 @@ namespace liveliness
 ///=============================================================================
 struct NodeInfo
 {
-  std::size_t domain_id_;
-  std::string ns_;
-  std::string name_;
-  std::string enclave_;
+    std::size_t domain_id_;
+    std::string ns_;
+    std::string name_;
+    std::string enclave_;
 
-  NodeInfo(
-    std::size_t domain_id,
-    std::string ns,
-    std::string name,
-    std::string enclave);
+    NodeInfo(
+        std::size_t domain_id,
+        std::string ns,
+        std::string name,
+        std::string enclave);
 };
 
 ///=============================================================================
 struct TopicInfo
 {
-  std::string name_;
-  std::string type_;
-  std::string qos_;
+    std::string name_;
+    std::string type_;
+    std::string qos_;
 
-  TopicInfo(
-    std::string name,
-    std::string type,
-    std::string qos);
+    TopicInfo(
+        std::string name,
+        std::string type,
+        std::string qos);
 };
 
 ///=============================================================================
@@ -60,12 +60,12 @@ std::string subscription_token(size_t domain_id);
 ///=============================================================================
 enum class EntityType : uint8_t
 {
-  Invalid = 0,
-  Node,
-  Publisher,
-  Subscription,
-  Service,
-  Client
+    Invalid = 0,
+    Node,
+    Publisher,
+    Subscription,
+    Service,
+    Client
 };
 
 ///=============================================================================
@@ -75,42 +75,42 @@ enum class EntityType : uint8_t
 class Entity
 {
 public:
-  /// Make an Entity from datatypes. This will return nullopt if the required
-  /// fields are not present for the EntityType.
-  // TODO(Yadunund): Find a way to better bundle the type and the associated data.
-  static std::optional<Entity> make(
-    EntityType type,
-    NodeInfo node_info,
-    std::optional<TopicInfo> topic_info = std::nullopt);
+    /// Make an Entity from datatypes. This will return nullopt if the required
+    /// fields are not present for the EntityType.
+    // TODO(Yadunund): Find a way to better bundle the type and the associated data.
+    static std::optional<Entity> make(
+        EntityType type,
+        NodeInfo node_info,
+        std::optional<TopicInfo> topic_info = std::nullopt);
 
-  /// Make an Entity from a liveliness keyexpr.
-  static std::optional<Entity> make(const std::string & keyexpr);
+    /// Make an Entity from a liveliness keyexpr.
+    static std::optional<Entity> make(const std::string & keyexpr);
 
-  /// Get the entity type.
-  EntityType type() const;
+    /// Get the entity type.
+    EntityType type() const;
 
-  std::string node_namespace() const;
+    std::string node_namespace() const;
 
-  std::string node_name() const;
+    std::string node_name() const;
 
-  std::string node_enclave() const;
+    std::string node_enclave() const;
 
-  /// Get the topic_info.
-  std::optional<TopicInfo> topic_info() const;
+    /// Get the topic_info.
+    std::optional<TopicInfo> topic_info() const;
 
-  /// Get the liveliness keyexpr for this entity.
-  std::string keyexpr() const;
+    /// Get the liveliness keyexpr for this entity.
+    std::string keyexpr() const;
 
 private:
-  Entity(
-    EntityType type,
-    NodeInfo node_info,
-    std::optional<TopicInfo> topic_info);
+    Entity(
+        EntityType type,
+        NodeInfo node_info,
+        std::optional<TopicInfo> topic_info);
 
-  EntityType type_;
-  NodeInfo node_info_;
-  std::optional<TopicInfo> topic_info_;
-  std::string keyexpr_;
+    EntityType type_;
+    NodeInfo node_info_;
+    std::optional<TopicInfo> topic_info_;
+    std::string keyexpr_;
 };
 
 ///=============================================================================
@@ -119,13 +119,13 @@ private:
 class PublishToken
 {
 public:
-  static bool put(
-    z_owned_session_t * session,
-    const std::string & token);
+    static bool put(
+        z_owned_session_t * session,
+        const std::string & token);
 
-  static bool del(
-    z_owned_session_t * session,
-    const std::string & token);
+    static bool del(
+        z_owned_session_t * session,
+        const std::string & token);
 };
 
 }  // namespace liveliness
