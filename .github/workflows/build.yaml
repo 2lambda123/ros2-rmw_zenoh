@@ -19,13 +19,13 @@ jobs:
     steps:
     - name: Deps
       run: |
-        apt update && apt install -y curl
+        apt update && apt install -y curl libssl-dev
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@stable
     - uses: actions/checkout@v2
     - name: rosdep
       run: |
         rosdep update
-        rosdep install --from-paths . -yir
+        rosdep install --from-paths . -yir --skip-keys "fastcdr fastrtps rti-connext-dds-5.3.1"
     - name: build
       run: /ros_entrypoint.sh colcon build
