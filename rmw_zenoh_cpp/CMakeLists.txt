@@ -25,7 +25,8 @@ find_package(yaml_cpp_vendor REQUIRED)
 find_package(zenoh_c_vendor REQUIRED)
 find_package(zenohc REQUIRED)
 
-add_library(rmw_zenoh_cpp SHARED
+add_library(
+  rmw_zenoh_cpp SHARED
   src/detail/identifier.cpp
   src/detail/graph_cache.cpp
   src/detail/guard_condition.cpp
@@ -45,36 +46,34 @@ add_library(rmw_zenoh_cpp SHARED
   src/rmw_init_options.cpp
   src/rmw_init.cpp
   src/rmw_qos.cpp
-  src/rmw_zenoh.cpp
-)
+  src/rmw_zenoh.cpp)
 
-target_link_libraries(rmw_zenoh_cpp
-  PRIVATE
-    ament_index_cpp::ament_index_cpp
-    fastcdr
-    rcpputils::rcpputils
-    rcutils::rcutils
-    rosidl_typesupport_fastrtps_c::rosidl_typesupport_fastrtps_c
-    rosidl_typesupport_fastrtps_cpp::rosidl_typesupport_fastrtps_cpp
-    rmw::rmw
-    yaml-cpp
-    zenohc::lib
-)
+target_link_libraries(
+  rmw_zenoh_cpp
+  PRIVATE ament_index_cpp::ament_index_cpp
+          fastcdr
+          rcpputils::rcpputils
+          rcutils::rcutils
+          rosidl_typesupport_fastrtps_c::rosidl_typesupport_fastrtps_c
+          rosidl_typesupport_fastrtps_cpp::rosidl_typesupport_fastrtps_cpp
+          rmw::rmw
+          yaml-cpp
+          zenohc::lib)
 
 configure_rmw_library(rmw_zenoh_cpp)
 
-target_compile_definitions(rmw_zenoh_cpp
-  PRIVATE
-    RMW_VERSION_MAJOR=${rmw_VERSION_MAJOR}
-    RMW_VERSION_MINOR=${rmw_VERSION_MINOR}
-    RMW_VERSION_PATCH=${rmw_VERSION_PATCH}
-)
+target_compile_definitions(
+  rmw_zenoh_cpp
+  PRIVATE RMW_VERSION_MAJOR=${rmw_VERSION_MAJOR}
+          RMW_VERSION_MINOR=${rmw_VERSION_MINOR}
+          RMW_VERSION_PATCH=${rmw_VERSION_PATCH})
 
 ament_export_targets(export_rmw_zenoh_cpp)
 
 register_rmw_implementation(
   "c:rosidl_typesupport_c:rosidl_typesupport_fastrtps_c:rosidl_typesupport_introspection_c"
-  "cpp:rosidl_typesupport_cpp:rosidl_typesupport_fastrtps_cpp:rosidl_typesupport_introspection_cpp")
+  "cpp:rosidl_typesupport_cpp:rosidl_typesupport_fastrtps_cpp:rosidl_typesupport_introspection_cpp"
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -86,25 +85,15 @@ install(
   EXPORT export_rmw_zenoh_cpp
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+  RUNTIME DESTINATION bin)
 
-install(
-  DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
-)
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
 add_executable(init_rmw_zenoh_router apps/init_rmw_zenoh_router.cpp)
 
 target_link_libraries(init_rmw_zenoh_router
-  PRIVATE
-    ament_index_cpp::ament_index_cpp
-    zenohc::lib
-)
+                      PRIVATE ament_index_cpp::ament_index_cpp zenohc::lib)
 
-install(
-  TARGETS init_rmw_zenoh_router
-  DESTINATION lib/${PROJECT_NAME}
-)
+install(TARGETS init_rmw_zenoh_router DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
