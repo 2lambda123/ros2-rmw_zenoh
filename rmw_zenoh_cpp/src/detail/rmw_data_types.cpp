@@ -22,51 +22,46 @@
 #include "rmw_data_types.hpp"
 
 ///==============================================================================
-void sub_data_handler(
-    const z_sample_t * sample,
-    void * data)
-{
-    z_owned_str_t keystr = z_keyexpr_to_string(sample->keyexpr);
+void sub_data_handler(const z_sample_t *sample, void *data) {
+  z_owned_str_t keystr = z_keyexpr_to_string(sample->keyexpr);
 
-    auto sub_data = static_cast<rmw_subscription_data_t *>(data);
-    if (sub_data == nullptr) {
-        RCUTILS_LOG_ERROR_NAMED(
-            "rmw_zenoh_cpp",
-            "Unable to obtain rmw_subscription_data_t from data for "
-            "subscription for %s",
-            z_loan(keystr)
-        );
-        return;
+  auto sub_data = static_cast<rmw_subscription_data_t *>(data);
+  if (sub_data == nullptr) {
+    RCUTILS_LOG_ERROR_NAMED(
+        "rmw_zenoh_cpp",
+        "Unable to obtain rmw_subscription_data_t from data for "
+        "subscription for %s",
+        z_loan(keystr));
+    return;
+  }
+
+  {
+    std::lock_guard<std::mutex> lock(sub_data->message_queue_mutex);
+
+    if (sub_data->message_queue.size() >= sub_data->queue_depth) {
+      // Log warning if message is discarded due to hitting the queue depth
+      RCUTILS_LOG_WARN_NAMED(
+          "rmw_zenoh_cpp",
+          "Message queue depth of %ld reached, discarding oldest message "
+          "for subscription for %s",
+          sub_data->queue_depth, z_loan(keystr));
+
+      std::unique_ptr<saved_msg_data> old =
+          std::move(sub_data->message_queue.back());
+      z_drop(&old->payload);
+      sub_data->message_queue.pop_back();
     }
 
-    {
-        std::lock_guard<std::mutex> lock(sub_data->message_queue_mutex);
+    sub_data->message_queue.emplace_front(std::make_unique<saved_msg_data>(
+        zc_sample_payload_rcinc(sample), sample->timestamp.time,
+        sample->timestamp.id.id));
 
-        if (sub_data->message_queue.size() >= sub_data->queue_depth) {
-            // Log warning if message is discarded due to hitting the queue depth
-            RCUTILS_LOG_WARN_NAMED(
-                "rmw_zenoh_cpp",
-                "Message queue depth of %ld reached, discarding oldest message "
-                "for subscription for %s",
-                sub_data->queue_depth,
-                z_loan(keystr));
-
-            std::unique_ptr<saved_msg_data> old = std::move(sub_data->message_queue.back());
-            z_drop(&old->payload);
-            sub_data->message_queue.pop_back();
-        }
-
-        sub_data->message_queue.emplace_front(
-            std::make_unique<saved_msg_data>(
-                zc_sample_payload_rcinc(sample),
-                sample->timestamp.time, sample->timestamp.id.id));
-
-        // Since we added new data, trigger the guard condition if it is available
-        std::lock_guard<std::mutex> internal_lock(sub_data->internal_mutex);
-        if (sub_data->condition != nullptr) {
-            sub_data->condition->notify_one();
-        }
+    // Since we added new data, trigger the guard condition if it is available
+    std::lock_guard<std::mutex> internal_lock(sub_data->internal_mutex);
+    if (sub_data->condition != nullptr) {
+      sub_data->condition->notify_one();
     }
+  }
 
-    z_drop(z_move(keystr));
+  z_drop(z_move(keystr));
 }

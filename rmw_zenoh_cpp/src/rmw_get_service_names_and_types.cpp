@@ -12,22 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include "rmw/get_service_names_and_types.h"
 
-extern "C"
-{
+extern "C" {
 ///==============================================================================
 /// Return all service names and types in the ROS graph.
-    rmw_ret_t
-    rmw_get_service_names_and_types(
-        const rmw_node_t * node,
-        rcutils_allocator_t * allocator,
-        rmw_names_and_types_t * service_names_and_types)
-    {
-        static_cast<void>(node);
-        static_cast<void>(allocator);
-        static_cast<void>(service_names_and_types);
-        return RMW_RET_UNSUPPORTED;
-    }
-}  // extern "C"
+rmw_ret_t rmw_get_service_names_and_types(
+    const rmw_node_t *node, rcutils_allocator_t *allocator,
+    rmw_names_and_types_t *service_names_and_types) {
+  static_cast<void>(node);
+  static_cast<void>(allocator);
+  static_cast<void>(service_names_and_types);
+  return RMW_RET_UNSUPPORTED;
+}
+} // extern "C"

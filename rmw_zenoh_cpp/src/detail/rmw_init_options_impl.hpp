@@ -18,10 +18,9 @@
 #include <zenoh.h>
 
 // TODO(YV): Consider using this again.
-struct rmw_init_options_impl_s
-{
-    // An owned config.
-    z_owned_config_t config;
+struct rmw_init_options_impl_s {
+  // An owned config.
+  z_owned_config_t config;
 };
 
-#endif  // DETAIL__RMW_INIT_OPTIONS_IMPL_HPP_
+#endif // DETAIL__RMW_INIT_OPTIONS_IMPL_HPP_

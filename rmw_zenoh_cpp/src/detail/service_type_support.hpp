@@ -23,22 +23,19 @@
 #include "type_support.hpp"
 
 ///==============================================================================
-class ServiceTypeSupport : public TypeSupport
-{
+class ServiceTypeSupport : public TypeSupport {
 protected:
-    ServiceTypeSupport();
+  ServiceTypeSupport();
 };
 
-class RequestTypeSupport final : public ServiceTypeSupport
-{
+class RequestTypeSupport final : public ServiceTypeSupport {
 public:
-    explicit RequestTypeSupport(const service_type_support_callbacks_t * members);
+  explicit RequestTypeSupport(const service_type_support_callbacks_t *members);
 };
 
-class ResponseTypeSupport final : public ServiceTypeSupport
-{
+class ResponseTypeSupport final : public ServiceTypeSupport {
 public:
-    explicit ResponseTypeSupport(const service_type_support_callbacks_t * members);
+  explicit ResponseTypeSupport(const service_type_support_callbacks_t *members);
 };
 
-#endif  // DETAIL__SERVICE_TYPE_SUPPORT_HPP_
+#endif // DETAIL__SERVICE_TYPE_SUPPORT_HPP_

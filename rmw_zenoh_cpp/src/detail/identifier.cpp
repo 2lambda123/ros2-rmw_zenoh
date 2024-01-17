@@ -14,4 +14,4 @@
 
 #include "identifier.hpp"
 
-const char * const rmw_zenoh_identifier = "rmw_zenoh_cpp";
+const char *const rmw_zenoh_identifier = "rmw_zenoh_cpp";

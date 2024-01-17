@@ -26,8 +26,9 @@
 #include "rosidl_typesupport_fastrtps_cpp/message_type_support.h"
 
 #define RMW_ZENOH_CPP_TYPESUPPORT_C rosidl_typesupport_fastrtps_c__identifier
-#define RMW_ZENOH_CPP_TYPESUPPORT_CPP rosidl_typesupport_fastrtps_cpp::typesupport_identifier
+#define RMW_ZENOH_CPP_TYPESUPPORT_CPP                                          \
+  rosidl_typesupport_fastrtps_cpp::typesupport_identifier
 
-std::string _create_type_name(const message_type_support_callbacks_t * members);
+std::string _create_type_name(const message_type_support_callbacks_t *members);
 
-#endif  // DETAIL__TYPE_SUPPORT_COMMON_HPP_
+#endif // DETAIL__TYPE_SUPPORT_COMMON_HPP_

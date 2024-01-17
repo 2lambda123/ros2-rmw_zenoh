@@ -24,4 +24,4 @@
 /// @return RMW_RET_OK if a Zenoh router is connected to the session.
 rmw_ret_t zenoh_router_check(z_session_t session);
 
-#endif  // DETAIL__ZENOH_ROUTER_CHECK_HPP_
+#endif // DETAIL__ZENOH_ROUTER_CHECK_HPP_

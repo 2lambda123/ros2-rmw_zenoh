@@ -23,12 +23,14 @@
 /// @details The behavior is as follows:
 ///   - If the environment variable `RMW_ZENOH_CONFIG_FILE` is set, it will
 ///     be used as the path to the zenoh configuration file.
-///     - In case there is an error reading the file, the internal configuration will be used.
+///     - In case there is an error reading the file, the internal configuration
+///     will be used.
 ///   - If the environment variable `RMW_ZENOH_CONFIG_FILE` is not set, the
 ///     configuration will be read from the internal configuration.
-///   - If internal configuration is not available, a zenoh default configuration is used.
+///   - If internal configuration is not available, a zenoh default
+///   configuration is used.
 /// @param config The zenoh configuration to be filled.
 /// @returns `RMW_RET_OK` if the configuration was successfully loaded.
-rmw_ret_t get_z_config(z_owned_config_t * config);
+rmw_ret_t get_z_config(z_owned_config_t *config);
 
-#endif  // DETAIL__ZENOH_CONFIG_HPP_
+#endif // DETAIL__ZENOH_CONFIG_HPP_
