@@ -1,7 +1,7 @@
 # rmw_zenoh
 
-[![build](https://github.com/ros2/rmw_zenoh/actions/workflows/build.yaml/badge.svg)](https://github.com/ros2/rmw_zenoh/actions/workflows/build.yaml)
-[![style](https://github.com/ros2/rmw_zenoh/actions/workflows/style.yaml/badge.svg)](https://github.com/ros2/rmw_zenoh/actions/workflows/style.yaml)
+[![build](https://github.com/ros2/rmw_zenoh/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/ros2/rmw_zenoh/actions/workflows/build.yaml)
+[![style](https://github.com/ros2/rmw_zenoh/actions/workflows/style.yaml/badge.svg?branch=main)](https://github.com/ros2/rmw_zenoh/actions/workflows/style.yaml)
 
 A ROS 2 RMW implementation based on Zenoh that is written using the zenoh-c bindings.
 
