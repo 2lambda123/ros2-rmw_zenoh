@@ -15,8 +15,11 @@ For information about the Design please visit [design](docs/design.md) page.
 
 ## Setup
 
-Install latest rustc.
-> Note: The version of rustc that can be installed via apt is outdated.
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+> Note: The version of # Install latest version of Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
