@@ -3,87 +3,76 @@ To see the latest development, please see the 'rolling' branch.
 
 # rmw_zenoh
 
-![](https://github.com/osrf/rmw_zenoh/workflows/CI/badge.svg)
+[![build](https://github.com/ros2/rmw_zenoh/actions/workflows/build.yaml/badge.svg)](https://github.com/ros2/rmw_zenoh/actions/workflows/build.yaml)
+[![style](https://github.com/ros2/rmw_zenoh/actions/workflows/style.yaml/badge.svg)](https://github.com/ros2/rmw_zenoh/actions/workflows/style.yaml)
 
-`rmw_zenoh` provides an experimental implementation of the ROS middleware interface using Eclipse Zenoh as the middleware.
-The RMW implementation is contained in the `rmw_zenoh_cpp` package.
+A ROS 2 RMW implementation based on Zenoh that is written using the zenoh-c bindings.
 
-*Note that this implementation is currently very young, under heavy development, and generally rapidly changing.*
-*It may work smoothly, or it may blow up and squash your cat.*
-*Please do not expect to use it except in an experimental capacity.*
+## Design
 
-Zenoh does not include its own serialisation scheme.
-Currently a hacked-up copy of [Fast CDR]() is used.
-In the future we hope to support different serialisation schemes, possibly in a configurable way.
+For information about the Design please visit [design](docs/design.md) page.
+
+## Requirements
+- [ROS 2](https://docs.ros.org): Rolling/Iron
 
 
-## Installation
+## Setup
 
-Set up a new workspace using the [provided `rmw_zenoh.repos` file](https://raw.githubusercontent.com/osrf/rmw_zenoh/main/rmw_zenoh.repos).
-
-```shell
-mkdir -p ~/rmw_zenoh_ws/src
-cd ~/rmw_zenoh_ws
-wget https://raw.githubusercontent.com/osrf/rmw_zenoh/main/rmw_zenoh.repos
-vcs import src < rmw_zenoh.repos
+Install latest rustc.
+> Note: The version of rustc that can be installed via apt is outdated.
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-Next, prepare your environment for compiling Zenoh.
-The `rmw_zenoh_cpp` package depends on the `zenoh_vendor` package to pull in Zenoh.
-`zenoh_vendor` provides the Zenoh foreign function interface (for C) library from the [Rust implementation of Zenoh](https://github.com/eclipse-zenoh/zenoh/tree/rust-master).
-The library is obtained by cloning and compiling the Zenoh source code from GitHub.
-Because it will compile Zenoh automatically, you must meet [the preconditions for compiling Zenoh](https://github.com/eclipse-zenoh/zenoh/tree/rust-master#how-to-build-it).
-Most importantly, you must use the nightly version of the Rust toolchain.
-[Install Rust using `rustup`](https://rustup.rs/), then run the following command to enable it.
+Build `rmw_zenoh_cpp`
 
-```shell
-rustup default nightly
+```bash
+mkdir ~/ws_rmw_zenoh/src -p && cd ~/ws_rmw_zenoh/src
+git clone git@github.com:ros2/rmw_zenoh.git
+cd ~/ws_rmw_zenoh
+source /opt/ros/<DISTRO>/setup.bash # replace <DISTRO> with ROS 2 distro of choice
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
+
 ```
 
-Next, ensure all the dependencies of the packages in the `rmw_zenoh_ws` are available.
+## Test
 
-```shell
-cd ~/rmw_zenoh_ws
-rosdep install --ignore-src --from-paths src --rosdistro=foxy -y
-```
-
-You are now ready to compile the workspace.
-Because of an as-yet unresolved quirk in the typesupport compilation (https://github.com/osrf/rmw_zenoh/issues/39), this needs to be done twice.
-
-```shell
-cd ~/rmw_zenoh_ws
-colcon build
+Source workspace
+```bash
+cd ~/ws_rmw_zenoh
 source install/setup.bash
-colcon build --cmake-force-configure
 ```
 
-## Testing
+In a terminal launch Zenoh router:
+```bash
+ros2 run rmw_zenoh_cpp init_rmw_zenoh_router
+```
+> Note: Manually launching zenoh router won't be necessary in the future.
 
-You can test `rmw_zenoh_cpp` using the existing ROS 2 sample nodes.
+In a different terminal source install folder and execute:
 
-Open two terminals and source the `rmw_zenoh_ws` workspace in each one.
-Then, in each terminal, change the active RMW implementation to `rmw_zenoh_cpp` using the `RMW_IMPLEMENTATION` environment variable.
-(See [this tutorial](https://index.ros.org/doc/ros2/Tutorials/Working-with-multiple-RMW-implementations/#specifying-rmw-implementations) for more information on changing your active RMW implementation.)
-Then, launch the demonstration publisher and subscriber nodes, one in each terminal.
-
-Terminal 1:
-
-```shell
-cd ~/rmw_zenoh_ws
-source install/setup.bash
+```bash
 export RMW_IMPLEMENTATION=rmw_zenoh_cpp
-ros2 run demo_nodes_cpp talker
+ros2 topic pub "/chatter" std_msgs/msg/String '{data: hello}'
 ```
 
-Terminal 2:
+## Config
+The [default configuration](rmw_zenoh_cpp/config/DEFAULT_RMW_ZENOH_SESSION_CONFIG.json5) sets up the zenoh sessions with the following main characteristics:
 
-```shell
-cd ~/rmw_zenoh_ws
-source install/setup.bash
-export RMW_IMPLEMENTATION=rmw_zenoh_cpp
-ros2 run demo_nodes_cpp listener
-```
+Table:
+| Zenoh Config | Default |
+| :---:   | :---: |
+| udp_multicast | disabled |
+| gossip scouting | enabled |
+| connect | tcp/localhost:7447 |
 
-You should see data being transmitted from the `talker` program to the `listener` program.
-You may also see various informational messages from the `rmw_zenoh_cpp` implementation.
-Most of these are temporary aides to development, but they do indicate that the correct RMW implementation is being used.
+This assumes that there is a `zenohd` running in the system at port 7447.
+A custom configuration may be provided by setting the `RMW_ZENOH_CONFIG_FILE` environment variable to point to a custom zenoh configuration file.
+
+
+## TODO Features
+- [x] Publisher
+- [ ] Subscription
+- [ ] Client
+- [ ] Service
+- [ ] Graph introspection
