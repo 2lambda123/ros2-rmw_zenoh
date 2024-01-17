@@ -5,14 +5,19 @@
 The following diagram shows the default network topology of a subsystem composed of 3 nodes:
 
 ```mermaid
-flowchart TB
-    %% COLORS %%
-    classDef blue fill:#2374f7,stroke:#000,stroke-width:2px,color:#fff
-    classDef red fill:#ed2633,stroke:#000,stroke-width:2px,color:#fff
-    classDef green fill:#16b522,stroke:#000,stroke-width:2px,color:#fff
-    classDef orange fill:#fc822b,stroke:#000,stroke-width:2px,color:#fff
-    classDef purple fill:#a724f7,stroke:#000,stroke-width:2px,color:#fff
-    classDef yellow fill:#a724f7,stroke:#000,stroke-width:2px,color:#fff
+graph TD
+    Router(Router\: tcp/localhost\:7447):::yellow
+    S1([Zenoh Session(Pub)]):::blue
+    S2([Zenoh Session(Sub)]):::blue
+    S3([Zenoh Session(Sub)]):::blue
+    Router -->|discovery| S1
+    Router -->|discovery| S2
+    Router -->|discovery| S3
+    S1 --\|p2p\| S2
+    S1 --\|p2p\| S3
+    S2 --\|p2p\| S3
+    S1 -->|Data| S2
+    S1 -->|Data| S3
 
     %% DIAGRAM %%
     Router(Zenoh Router:\n tcp/localhost:7447):::yellow
